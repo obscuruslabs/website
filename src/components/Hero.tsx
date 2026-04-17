@@ -70,7 +70,7 @@ export default function Hero() {
           </div>
           <div className="pointer-events-auto mt-4">
             <button className="bg-white text-black px-8 py-4 rounded-xl font-bold text-lg hover:bg-purple-600 hover:text-white transition-all shadow-2xl cursor-pointer">
-              [ buy now &mdash; $249 ]
+              [ Buy now &mdash; $24.99 ]
             </button>
           </div>
         </div>
