@@ -5,13 +5,21 @@
 // `[env]` in fly.toml / fly.staging.toml, not here.
 //
 // Usage:
-//   pnpm maintenance on             # show the coming-soon page
-//   pnpm maintenance off            # show the full storefront
-//   pnpm maintenance status         # print current SITE_MODE / NOINDEX
-//   pnpm maintenance on --app=...   # target a specific Fly app (default: obscuruslabs)
+//   pnpm maintenance on                # prod → coming-soon
+//   pnpm maintenance off               # prod → full storefront
+//   pnpm maintenance status            # prod status
+//
+//   pnpm maintenance on  staging       # staging → coming-soon
+//   pnpm maintenance off staging       # staging → full storefront
+//   pnpm maintenance status staging    # staging status
+//
+//   pnpm maintenance on --app=foo      # target a raw Fly app name
+//
+// Positional env aliases: "staging" | "stg" → obscuruslabs-staging;
+// "prod" | "production" → obscuruslabs. Anything else is passed as-is.
 //
 // Flags:
-//   --app=<name>   Fly app to target (default "obscuruslabs")
+//   --app=<name>   Fly app to target (overrides positional env)
 //   --yes          Skip the launch-confirmation prompt when turning OFF on prod
 //   --dry-run      Print the flyctl command that would run, do nothing
 //
@@ -22,8 +30,16 @@ import { spawn, spawnSync } from 'node:child_process';
 import { createInterface } from 'node:readline/promises';
 import { stdin, stdout } from 'node:process';
 
-const DEFAULT_APP = 'obscuruslabs';
 const PROD_APP = 'obscuruslabs';
+const STAGING_APP = 'obscuruslabs-staging';
+const ENV_ALIASES = {
+  prod: PROD_APP,
+  production: PROD_APP,
+  p: PROD_APP,
+  staging: STAGING_APP,
+  stg: STAGING_APP,
+  s: STAGING_APP,
+};
 const VALID_ACTIONS = new Set(['on', 'off', 'status']);
 
 function parseArgs(argv) {
@@ -37,9 +53,14 @@ function parseArgs(argv) {
       positional.push(arg);
     }
   }
+  const action = positional[0];
+  const envArg = positional[1];
+  const appFromEnvArg = envArg
+    ? ENV_ALIASES[envArg.toLowerCase()] ?? envArg
+    : undefined;
   return {
-    action: positional[0],
-    app: flags.app ?? DEFAULT_APP,
+    action,
+    app: flags.app ?? appFromEnvArg ?? PROD_APP,
     yes: flags.yes === true,
     dryRun: flags['dry-run'] === true,
   };
@@ -169,7 +190,7 @@ async function setSiteMode(flyctl, app, { siteMode, dryRun, skipConfirm, actionL
 async function main() {
   const { action, app, yes, dryRun } = parseArgs(process.argv.slice(2));
   if (!VALID_ACTIONS.has(action)) {
-    console.error('Usage: pnpm maintenance <on|off|status> [--app=<fly-app>] [--yes] [--dry-run]');
+    console.error('Usage: pnpm maintenance <on|off|status> [prod|staging] [--yes] [--dry-run]');
     process.exit(2);
   }
 
