@@ -16,8 +16,11 @@
           buildInputs = with pkgs; [
             nodejs_22
             nodePackages.npm
+            nodePackages.pnpm
             nodePackages.typescript
             nodePackages.typescript-language-server
+            flyctl
+            gh
           ];
 
           shellHook = ''
