@@ -2,22 +2,22 @@ const PILLARS = [
   {
     title: 'IR bloom',
     body:
-      'Twelve near-infrared emitters — six at 850nm, six at 940nm — wash out the CMOS sensors used in 98% of consumer and commercial cameras. The frame becomes a light source brighter than your face.',
+      'Six infrared LEDs at 940nm — wash out the CMOS sensors used in almost all consumer and commercial cameras that use non visible IR light. The glasses emit a light source brighter enough to obscure than your entire face when pointed at an IR camera.',
   },
   {
     title: 'Invisible to you',
     body:
-      'Human eyes cut off around 700nm. The LEDs are dark to bystanders. No glow, no indicator, no tell. The person next to you will not know they are on.',
+      'Human eyes cut off around 700nm. at 950nm the LEDs are invisible to bystanders.',
   },
   {
-    title: 'No radio, no jam',
+    title: 'No radio nor jamming tech',
     body:
-      'Ghost does not jam, record, or transmit. It emits light — legal in every jurisdiction we operate in. No FCC license, no signal interference, no paper trail.',
+      'The ghost glasses does not jam or transmit any light that would, go against any laws by the FCC or any in the US.',
   },
   {
     title: 'Built for repair',
     body:
-      'User-replaceable 18650 cell. Standard Torx screws. We publish the service manual. Your hardware, not ours.',
+      'User-replaceable CR2032 cell. Standard hex screws for the battery casing. We publish the service manual.',
   },
 ];
 
