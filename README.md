@@ -120,7 +120,7 @@ Required repo secret:
 
 ```bash
 flyctl tokens create org personal --name "github-actions" --expiry 999999h
-gh secret set FLY_API_TOKEN --repo thejonanshow/obscuruslabs
+gh secret set FLY_API_TOKEN --repo obscuruslabs/website
 ```
 
 Rollback to any prior SHA without a build:

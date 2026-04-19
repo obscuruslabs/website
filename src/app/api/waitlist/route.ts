@@ -1,14 +1,14 @@
 import { NextResponse, type NextRequest } from 'next/server';
-import { sendEmail } from '@/lib/email';
+import { sendEmail, addToWaitlistAudience } from '@/lib/email';
 import { waitlistConfirmationEmail } from '@/lib/emails/waitlist-confirmation';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 // Always returns { ok: true } for any syntactically valid email. The signup
-// intent is captured in Fly logs (`[waitlist] subscribe <email>`), so even
-// when Resend errors or is rate-limited, we don't lose the lead and the user
-// never sees a failure. Email-send failures are logged separately with enough
-// context to replay later.
+// intent is captured in Fly logs AND in the Resend audience, so even when a
+// downstream call errors or is rate-limited, we don't lose the lead and the
+// user never sees a failure. Audience add + confirmation send failures each
+// log separately with enough context to replay.
 export async function POST(req: NextRequest) {
   let email: string;
   try {
@@ -23,6 +23,18 @@ export async function POST(req: NextRequest) {
 
   console.log('[waitlist] subscribe', email);
 
+  // Add to the persistent Resend audience. This is the durable signup record.
+  try {
+    await addToWaitlistAudience(email);
+  } catch (err) {
+    console.error('[waitlist] audience add failed — signup still in logs', {
+      email,
+      error: err instanceof Error ? err.message : String(err),
+    });
+  }
+
+  // Fire confirmation email. Intentionally independent of audience add; a
+  // failed add shouldn't block the email, and vice versa.
   try {
     const { html, text } = waitlistConfirmationEmail();
     await sendEmail({
@@ -32,9 +44,7 @@ export async function POST(req: NextRequest) {
       text,
     });
   } catch (err) {
-    // The user already sees a success state. The email didn't go out, but the
-    // signup is in the logs. A backfill job (or us, manually) can retry later.
-    console.error('[waitlist] email send failed — signup retained', {
+    console.error('[waitlist] confirmation email failed — signup retained', {
       email,
       error: err instanceof Error ? err.message : String(err),
     });
