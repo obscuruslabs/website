@@ -4,19 +4,19 @@
 // (staging should always be noindex; prod is noindex until we launch), set via
 // `[env]` in fly.toml / fly.staging.toml, not here.
 //
-// Usage:
-//   pnpm maintenance on                # prod → coming-soon
-//   pnpm maintenance off               # prod → full storefront
-//   pnpm maintenance status            # prod status
+// Usage (default target is STAGING — safer, you have to opt into prod):
+//   pnpm maintenance on                    # staging → coming-soon
+//   pnpm maintenance off                   # staging → full storefront
+//   pnpm maintenance status                # staging status
 //
-//   pnpm maintenance on  staging       # staging → coming-soon
-//   pnpm maintenance off staging       # staging → full storefront
-//   pnpm maintenance status staging    # staging status
+//   pnpm maintenance on  production        # prod → coming-soon
+//   pnpm maintenance off production        # prod → full storefront
+//   pnpm maintenance status production     # prod status
 //
-//   pnpm maintenance on --app=foo      # target a raw Fly app name
+//   pnpm maintenance on --app=foo          # target a raw Fly app name
 //
-// Positional env aliases: "staging" | "stg" → obscuruslabs-staging;
-// "prod" | "production" → obscuruslabs. Anything else is passed as-is.
+// Positional env aliases: "staging" | "stg" | "s" → obscuruslabs-staging;
+// "prod" | "production" | "p" → obscuruslabs. Anything else is passed as-is.
 //
 // Flags:
 //   --app=<name>   Fly app to target (overrides positional env)
@@ -60,7 +60,7 @@ function parseArgs(argv) {
     : undefined;
   return {
     action,
-    app: flags.app ?? appFromEnvArg ?? PROD_APP,
+    app: flags.app ?? appFromEnvArg ?? STAGING_APP,
     yes: flags.yes === true,
     dryRun: flags['dry-run'] === true,
   };
@@ -190,7 +190,8 @@ async function setSiteMode(flyctl, app, { siteMode, dryRun, skipConfirm, actionL
 async function main() {
   const { action, app, yes, dryRun } = parseArgs(process.argv.slice(2));
   if (!VALID_ACTIONS.has(action)) {
-    console.error('Usage: pnpm maintenance <on|off|status> [prod|staging] [--yes] [--dry-run]');
+    console.error('Usage: pnpm maintenance <on|off|status> [staging|production] [--yes] [--dry-run]');
+    console.error('  (default target is staging — add "production" to target prod)');
     process.exit(2);
   }
 

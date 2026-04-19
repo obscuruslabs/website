@@ -75,27 +75,58 @@ flyctl secrets set -a obscuruslabs \
 
 ### Maintenance mode
 
-Flip production between the coming-soon page and the full storefront:
+Flip `SITE_MODE` between coming-soon and full storefront. **Default target is
+staging** — prod requires an explicit `production` positional:
 
 ```bash
-pnpm maintenance status   # show current SITE_MODE / NOINDEX / secrets
-pnpm maintenance on       # hide the site behind the coming-soon page
-pnpm maintenance off      # launch — show the full storefront
+pnpm maintenance status                # staging status (default)
+pnpm maintenance on                    # staging → coming-soon
+pnpm maintenance off                   # staging → full storefront
+
+pnpm maintenance status production     # prod status
+pnpm maintenance on  production        # prod → coming-soon
+pnpm maintenance off production        # prod → full storefront
 ```
 
-Add `--app=obscuruslabs-staging` to target staging, `--dry-run` to preview the
-command, and `--yes` to skip the "you're about to launch" confirmation.
+Flags: `--dry-run` to preview the command, `--yes` to skip the prod launch
+confirmation, `--app=<name>` to target a raw Fly app name.
 
-The script wraps `flyctl secrets set` and reads `FLYIO_API_KEY` from [.env](.env)
-if `FLY_API_TOKEN` isn't already in your environment. It falls back to
-`nix run nixpkgs#flyctl` if `flyctl` isn't on your PATH.
-
-### GitHub Actions deploy token
+The script only toggles `SITE_MODE`. `NOINDEX` is an environment property set
+via `[env]` in `fly.toml` / `fly.staging.toml` and is not touched by the
+script. At prod launch, allow indexing separately:
 
 ```bash
-flyctl tokens create deploy -x 999999h
-# add as repo secret: FLY_API_TOKEN
+flyctl secrets set -a obscuruslabs NOINDEX=false
+```
+
+Auth uses whatever `flyctl` already has — run `flyctl auth whoami` to check.
+
+### GitHub Actions: build-once / promote architecture
+
+Two workflows feed deploys:
+
+- [build.yml](.github/workflows/build.yml) — on every push and PR, builds the
+  Docker image with BuildKit + GHA layer cache, tags it with the commit SHA,
+  and pushes to `registry.fly.io/obscuruslabs:sha-<commit>`. Same image for
+  every environment.
+- [deploy.yml](.github/workflows/deploy.yml) — triggered by a successful Build
+  run. Pulls the SHA-tagged image from the registry and calls `flyctl deploy
+  --image ...` against the target app. No rebuild. Typical deploy: 20–30s.
+
+The same bytes that passed PR CI deploy to staging; the same bytes that ran on
+staging deploy to prod. Merging `staging → main` is literal artifact promotion.
+
+Required repo secret:
+
+```bash
+flyctl tokens create org personal --name "github-actions" --expiry 999999h
 gh secret set FLY_API_TOKEN --repo thejonanshow/obscuruslabs
+```
+
+Rollback to any prior SHA without a build:
+
+```bash
+flyctl deploy --image registry.fly.io/obscuruslabs:sha-<old-commit> -a obscuruslabs
 ```
 
 ## Stripe webhook endpoints
