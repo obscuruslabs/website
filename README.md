@@ -54,6 +54,7 @@ flyctl secrets set -a obscuruslabs-staging \
   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY="pk_test_..." \
   RESEND_API_KEY="re_..." \
   EMAIL_FROM="obscurus labs <hello@stg.obscuruslabs.com>" \
+  WAITLIST_TOKEN_SECRET="$(openssl rand -base64 32)" \
   NEXT_PUBLIC_PLAUSIBLE_SCRIPT_SRC="stg.obscuruslabs.com"
 
 flyctl certs create stg.obscuruslabs.com -a obscuruslabs-staging
@@ -70,6 +71,7 @@ flyctl secrets set -a obscuruslabs \
   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY="pk_live_..." \
   RESEND_API_KEY="re_..." \
   EMAIL_FROM="obscurus labs <hello@obscuruslabs.com>" \
+  WAITLIST_TOKEN_SECRET="$(openssl rand -base64 32)" \
   NEXT_PUBLIC_PLAUSIBLE_SCRIPT_SRC="obscuruslabs.com"
 ```
 
@@ -150,11 +152,15 @@ src/
     opengraph-image.tsx  # Dynamic OG
     success/             # Post-checkout
     cancel/
+    waitlist/
+      confirmed/         # Landing after clicking the confirm link
+      error/             # Landing for expired/invalid confirm links
     (legal)/             # terms, privacy, returns, shipping, contact
     api/
       checkout/          # Stripe Checkout session
       stripe/webhook/    # Order fulfilment trigger
-      waitlist/          # Waitlist subscribe
+      waitlist/          # POST: send confirm link (no audience write yet)
+        confirm/         # GET: verify token, write to audience, redirect
   components/
     Hero, Nav, Footer, Product, Tech, Faq, Waitlist, ComingSoon, BuyButton, ProductJsonLd
   lib/
@@ -164,5 +170,30 @@ src/
     stripe.ts
     email.ts
     emails/              # html templates
+    waitlist-token.ts    # HMAC sign/verify for confirm links
   middleware.ts          # Basic auth + noindex on staging
 ```
+
+## Waitlist (double opt-in)
+
+`POST /api/waitlist` validates the email, signs a 7-day HMAC token, and
+emails a confirmation link. The contact is **not** written to the Resend
+audience at this point.
+
+`GET /api/waitlist/confirm?token=…` verifies the token, calls
+`addToWaitlistAudience` (idempotent), and redirects to
+`/waitlist/confirmed`. Bad/expired tokens redirect to `/waitlist/error`.
+
+The HMAC secret lives in `WAITLIST_TOKEN_SECRET` and must be set per
+environment:
+
+```bash
+flyctl secrets set -a obscuruslabs-staging \
+  WAITLIST_TOKEN_SECRET="$(openssl rand -base64 32)"
+
+flyctl secrets set -a obscuruslabs \
+  WAITLIST_TOKEN_SECRET="$(openssl rand -base64 32)"
+```
+
+Use a different value in each environment so a leaked staging secret
+can't forge prod confirmations.
