@@ -27,3 +27,11 @@ export const PROTOTYPE_LIMIT = (() => {
 // changing the limit (e.g., shipping issues). Treated as "available unless
 // explicitly disabled".
 export const PROTOTYPE_AVAILABLE = process.env.PROTOTYPE_AVAILABLE !== 'false';
+
+// Stable Stripe Product ID for the prototype. Required for the
+// `applies_to.products` restriction on prototype-only coupons. Created
+// via scripts/seed-discounts.mjs and persisted as a Fly secret. When
+// unset, /api/checkout falls back to inline product_data — coupons with
+// product restrictions won't apply, but the buy still works at full
+// price.
+export const STRIPE_PROTOTYPE_PRODUCT_ID = process.env.STRIPE_PROTOTYPE_PRODUCT_ID ?? '';

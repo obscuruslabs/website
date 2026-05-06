@@ -18,6 +18,10 @@ export type ProductDef = {
   description: string;
   shipping: FreeShipping | PaidShipping;
   specs: ReadonlyArray<{ label: string; value: string }>;
+  // Optional stable Stripe Product ID — when set, the checkout line item
+  // references this instead of creating an inline product_data, which is
+  // what coupons with applies_to.products need to match against.
+  stripeProductId?: string;
 };
 
 export const PRODUCTS = {

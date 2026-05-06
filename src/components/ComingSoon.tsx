@@ -1,7 +1,10 @@
 import Waitlist from './Waitlist';
 import PrototypeCard from './PrototypeCard';
+import DiscountBanner, { type DiscountBannerProps } from './DiscountBanner';
 
-export default function ComingSoon() {
+type Props = { banner?: DiscountBannerProps };
+
+export default function ComingSoon({ banner }: Props = {}) {
   return (
     <main className="min-h-screen flex flex-col selection:bg-purple-500/30 bg-[#0A0A0A] text-[#EDEDED]">
       <nav className="px-8 py-6">
@@ -24,6 +27,8 @@ export default function ComingSoon() {
               VISO .01 &apos;Ghost&apos; ships this summer.
             </p>
           </div>
+
+          {banner && <DiscountBanner {...banner} />}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
             <PrototypeCard />

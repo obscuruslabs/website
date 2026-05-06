@@ -203,6 +203,43 @@ To raise or lower the cap:
 flyctl secrets set -a obscuruslabs PROTOTYPE_LIMIT=20
 ```
 
+## Discount codes
+
+Five percent-off codes apply to the prototype only: `PROTO5`, `PROTO10`,
+`PROTO15`, `PROTO20`, `PROTO25`. They live in Stripe (one coupon + one
+promotion code per tier, restricted via `applies_to.products`). The
+homepage accepts both `?code=PROTO10` shareable links *and* customers
+typing the code on the Stripe-hosted checkout page.
+
+### Bootstrap (one-time per environment)
+
+```bash
+# Test mode — staging
+STRIPE_SECRET_KEY=sk_test_... node scripts/seed-discounts.mjs
+flyctl secrets set -a obscuruslabs-staging STRIPE_PROTOTYPE_PRODUCT_ID=prod_…
+
+# Live mode — production
+STRIPE_SECRET_KEY=sk_live_... node scripts/seed-discounts.mjs
+flyctl secrets set -a obscuruslabs STRIPE_PROTOTYPE_PRODUCT_ID=prod_…
+```
+
+The script is idempotent — re-running detects existing product, coupons,
+and codes and skips them. Use `DISCOUNT_TIERS=…` (JSON) to override
+defaults, e.g. swap `PROTO15` for a themed string like `LAUNCH15`.
+
+### Disabling a code
+
+Deactivate in Stripe Dashboard → Products → Coupons (or via the API).
+The homepage validation catches the `active: false` flip within ~60s
+(in-memory cache TTL).
+
+### Removing the product restriction (rare)
+
+If you want a code to apply to the Ghost as well, edit the coupon's
+`applies_to.products` in Stripe Dashboard or recreate without the
+restriction. The /api/checkout route also enforces prototype-only
+defense-in-depth at the API layer.
+
 ## Waitlist (double opt-in)
 
 `POST /api/waitlist` validates the email, signs a 7-day HMAC token, and

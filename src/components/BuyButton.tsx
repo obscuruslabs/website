@@ -4,6 +4,7 @@ import { PRODUCTS, formatPrice, type Sku } from '@/lib/product';
 
 type Props = {
   sku?: Sku;
+  code?: string;
   label?: string;
   className?: string;
   disabled?: boolean;
@@ -15,6 +16,7 @@ const DEFAULT_CLASS =
 
 export default function BuyButton({
   sku = 'viso-ghost',
+  code,
   label,
   className = DEFAULT_CLASS,
   disabled = false,
@@ -34,7 +36,7 @@ export default function BuyButton({
         const res = await fetch('/api/checkout', {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({ sku }),
+          body: JSON.stringify(code ? { sku, code } : { sku }),
         });
         if (res.status === 410) {
           setError('sold out — try the waitlist');
