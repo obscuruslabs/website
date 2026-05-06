@@ -2,7 +2,9 @@ import { NextResponse, type NextRequest } from 'next/server';
 import type Stripe from 'stripe';
 import { stripe, STRIPE_WEBHOOK_SECRET } from '@/lib/stripe';
 import { sendEmail } from '@/lib/email';
-import { orderConfirmationEmail } from '@/lib/emails/order-confirmation';
+import { orderConfirmationEmail, orderEmailSubject } from '@/lib/emails/order-confirmation';
+import { isSku } from '@/lib/product';
+import { invalidatePrototypeInventory } from '@/lib/inventory';
 
 export const runtime = 'nodejs';
 
@@ -32,22 +34,32 @@ export async function POST(req: NextRequest) {
       const email = session.customer_details?.email ?? session.customer_email;
       const name = session.customer_details?.name ?? undefined;
       const amount = session.amount_total ?? 0;
+      const rawSku = session.metadata?.sku;
+      const sku = isSku(rawSku) ? rawSku : undefined;
 
       console.log('[stripe webhook] order completed', {
         id: session.id,
+        sku,
         email,
         amount,
       });
+
+      // Bust the prototype inventory cache so the next render reflects the
+      // sale even if Stripe Search hasn't caught up yet.
+      if (sku === 'viso-prototype') {
+        invalidatePrototypeInventory();
+      }
 
       if (email) {
         const { html, text } = orderConfirmationEmail({
           orderId: session.id,
           amountCents: amount,
           customerName: name ?? undefined,
+          sku,
         });
         await sendEmail({
           to: email,
-          subject: 'your VISO .01 is on the way',
+          subject: orderEmailSubject(sku),
           html,
           text,
         });

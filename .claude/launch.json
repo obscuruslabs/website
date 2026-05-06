@@ -6,6 +6,18 @@
       "runtimeExecutable": "npx",
       "runtimeArgs": ["next", "dev", "--port", "3000"],
       "port": 3000
+    },
+    {
+      "name": "dev-maintenance",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": ["-c", "SITE_MODE=coming_soon npx next dev --port 3001"],
+      "port": 3001
+    },
+    {
+      "name": "dev-maintenance-soldout",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": ["-c", "SITE_MODE=coming_soon PROTOTYPE_AVAILABLE=false npx next dev --port 3002"],
+      "port": 3002
     }
   ]
 }
