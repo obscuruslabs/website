@@ -13,8 +13,8 @@ export default function SuccessPage() {
           thank you.
         </h1>
         <p className="text-neutral-400 leading-relaxed mb-10">
-          Your VISO .01 &lsquo;Ghost&rsquo; is queued for assembly. A confirmation
-          email is on its way. Tracking follows within 48 hours.
+          A confirmation email is on its way with the details. Tracking lands
+          in your inbox the moment your order leaves our lab.
         </p>
         <Link
           href="/"

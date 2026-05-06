@@ -174,6 +174,35 @@ src/
   middleware.ts          # Basic auth + noindex on staging
 ```
 
+## Prototype sales (maintenance page)
+
+When `SITE_MODE=coming_soon`, the maintenance page offers a second CTA
+beside the waitlist: a $39 prototype unit (`viso-prototype` SKU) sold via
+the same Stripe Checkout flow as the production Ghost. Two env vars
+control it:
+
+```bash
+PROTOTYPE_LIMIT=12          # cap on the run; default 12
+PROTOTYPE_AVAILABLE=true    # kill switch — set 'false' to pause sales
+```
+
+Inventory is counted from completed Stripe Checkout sessions whose
+`metadata.sku === 'viso-prototype'` via the Stripe Search API, cached
+in-memory for 60 seconds. The webhook invalidates the cache when a sale
+lands so the page updates immediately.
+
+To pause sales without changing the limit:
+
+```bash
+flyctl secrets set -a obscuruslabs PROTOTYPE_AVAILABLE=false
+```
+
+To raise or lower the cap:
+
+```bash
+flyctl secrets set -a obscuruslabs PROTOTYPE_LIMIT=20
+```
+
 ## Waitlist (double opt-in)
 
 `POST /api/waitlist` validates the email, signs a 7-day HMAC token, and
