@@ -1,6 +1,8 @@
 import Image from 'next/image';
+import { cookies } from 'next/headers';
 import { PRODUCTS, formatPrice, formatPriceExact } from '@/lib/product';
 import { getPrototypeInventory } from '@/lib/inventory';
+import { lookupPromoCode } from '@/lib/discount';
 import BuyButton from './BuyButton';
 
 const ANGLES = [
@@ -15,6 +17,13 @@ export default async function PrototypeCard() {
   const usRate = product.shipping.kind === 'paid'
     ? product.shipping.rates.find((r) => r.country === 'US')
     : undefined;
+
+  // Read discount cookie server-side and re-validate (lookup is cached
+  // for 60s). The cookie may carry a code that's since been deactivated;
+  // a stale lookup would just mean the auto-apply doesn't fire.
+  const cookieStore = await cookies();
+  const cookieCode = cookieStore.get('discount_code')?.value;
+  const discount = cookieCode ? await lookupPromoCode(cookieCode) : null;
 
   return (
     <div className="border border-neutral-800 rounded-2xl overflow-hidden bg-neutral-950/50 flex flex-col">
@@ -77,8 +86,13 @@ export default async function PrototypeCard() {
           </div>
           <BuyButton
             sku="viso-prototype"
+            code={discount?.code}
             disabled={!inventory.available}
-            label={`[ buy prototype — ${formatPrice(product.priceCents)} ]`}
+            label={
+              discount
+                ? `[ buy prototype — ${formatPrice(product.priceCents)} (${discount.percentOff}% off) ]`
+                : `[ buy prototype — ${formatPrice(product.priceCents)} ]`
+            }
             className="bg-white text-black px-6 py-3 rounded-xl font-bold hover:bg-purple-600 hover:text-white transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
           />
         </div>
