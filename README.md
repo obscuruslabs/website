@@ -177,7 +177,7 @@ src/
 ## Prototype sales (maintenance page)
 
 When `SITE_MODE=coming_soon`, the maintenance page offers a second CTA
-beside the waitlist: a $39 prototype unit (`viso-prototype` SKU) sold via
+beside the waitlist: a $29 prototype unit (`viso-prototype` SKU) sold via
 the same Stripe Checkout flow as the production Ghost. Two env vars
 control it:
 
