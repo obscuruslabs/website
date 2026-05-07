@@ -23,11 +23,11 @@ to live behind magic-link auth (see
    `01R7K7VV` (no prefix) or `GIFT-AB3K9Z` (prefix `GIFT-`). Stripe
    accepts both shapes; promotion-code lookup is case-insensitive on
    entry.
-2. **Percent cap — none.** Stripe has no native cap and we trust the
-   two admins. The create-success state shows the percent prominently
-   so a typo is visible immediately and a one-click deactivate is
-   right there. (If the user reverses this later, a soft cap is a
-   one-line change.)
+2. **Percent cap — 25%.** Stripe has no native cap, so this is
+   enforced in our server action. Anything above 25 fails validation
+   with a clear "max 25%" error. Soft override via env var
+   `ADMIN_DISCOUNT_MAX_PERCENT` if we ever want to raise it for a
+   one-off campaign without a code change.
 3. **Default expiry — 30 days from creation.** Form has an expiry
    date input that defaults to today + 30 days; admin can change or
    clear ("no expiry").
@@ -151,7 +151,7 @@ src/app/admin/
 - `createCodeAction(formData)`:
   - Reads session cookie via the auth lib from the magic-link plan, gets `createdByEmail`.
   - Validates form fields:
-    - `percent`: integer 1–100.
+    - `percent`: integer 1–`ADMIN_DISCOUNT_MAX_PERCENT` (default 25).
     - `note`: non-empty after trim, ≤ 80 chars.
     - `prefix`: optional; if present, [A-Z0-9-]+, ≤ 16 chars (Stripe rejects mixed-case codes? — actually Stripe accepts them and is case-insensitive on lookup. Normalize to uppercase regardless.)
     - `expiresAt`: optional; if present, must be in the future and ≤ 1 year out.
@@ -171,8 +171,9 @@ request.
 
 ### Env additions
 
-None. Trust the admin, no soft cap. (Reverse this with a one-line
-`ADMIN_DISCOUNT_MAX_PERCENT` env if we observe issues.)
+- `ADMIN_DISCOUNT_MAX_PERCENT` — integer, default `25`. Hard cap on
+  the percent input. Read at request time. Raise via Fly secret for
+  one-off campaigns without redeploying.
 
 No new third-party secrets.
 
@@ -187,6 +188,8 @@ src/
   lib/
     admin-codes.ts                      new   Stripe wrapper helpers (create/list/deactivate)
     admin-sales.ts                      new   Stripe sales lookup + KPI aggregation
+    env.ts                              modify  add ADMIN_DISCOUNT_MAX_PERCENT (default 25)
+.env.example                            modify  document the new var
 README.md                               modify  document the new flow + decommission steps
 scripts/
   decommission-recurring-codes.mjs      new   one-shot deactivator for PROTO5/10/15/20/25
@@ -197,8 +200,8 @@ docs/
 
 ### Validation invariants
 
-- Percent is integer in [1, 100]. No app-level cap (Stripe doesn't
-  cap either; we trust the admin).
+- Percent is integer in [1, `ADMIN_DISCOUNT_MAX_PERCENT`] (default 25).
+  Anything above the cap fails validation with a clear message.
 - Note is non-empty after trim, ≤ 80 characters.
 - Prefix, if provided, is `^[A-Z0-9-]{1,16}$` after uppercasing.
 - Expiry, if provided, is in the future and ≤ 1 year away. (Sanity
