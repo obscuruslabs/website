@@ -155,6 +155,10 @@ src/
     waitlist/
       confirmed/         # Landing after clicking the confirm link
       error/             # Landing for expired/invalid confirm links
+    admin/               # Operator console — gated by magic-link auth
+      login/             # email-entry form + server action
+      auth/verify/       # GET: verify magic-link token, set session cookie
+      logout/            # POST: clear session cookie
     (legal)/             # terms, privacy, returns, shipping, contact
     api/
       checkout/          # Stripe Checkout session
@@ -171,7 +175,10 @@ src/
     email.ts
     emails/              # html templates
     waitlist-token.ts    # HMAC sign/verify for confirm links
-  middleware.ts          # Basic auth + noindex on staging
+    admin-token.ts       # HMAC sign/verify for magic links
+    admin-session.ts     # HMAC sign/verify for session cookies
+    admin-allowlist.ts   # env-driven operator allowlist
+  middleware.ts          # Basic auth + /admin gate + noindex on staging
 ```
 
 ## Prototype sales (maintenance page)
@@ -263,3 +270,42 @@ flyctl secrets set -a obscuruslabs \
 
 Use a different value in each environment so a leaked staging secret
 can't forge prod confirmations.
+
+## Admin (magic-link auth)
+
+`/admin` is gated by passwordless magic-link auth. Operators submit
+their email at `/admin/login`, receive a 30-minute single-use link
+via Resend, and click it to land on `/admin` with a 30-day session
+cookie. There is no password, no third-party identity provider, no
+account creation flow — only emails listed in `ADMIN_EMAILS` can sign
+in.
+
+Three env vars per environment:
+
+```bash
+flyctl secrets set -a obscuruslabs-staging \
+  ADMIN_EMAILS="tavinscheffler@gmail.com,jonanscheffler@gmail.com" \
+  ADMIN_TOKEN_SECRET="$(openssl rand -base64 32)" \
+  ADMIN_SESSION_SECRET="$(openssl rand -base64 32)"
+
+flyctl secrets set -a obscuruslabs \
+  ADMIN_EMAILS="tavinscheffler@gmail.com,jonanscheffler@gmail.com" \
+  ADMIN_TOKEN_SECRET="$(openssl rand -base64 32)" \
+  ADMIN_SESSION_SECRET="$(openssl rand -base64 32)"
+```
+
+Use **different** secrets per environment, and **different** values
+for `ADMIN_TOKEN_SECRET` vs `ADMIN_SESSION_SECRET` (a leak of one
+shouldn't allow forgery via the other).
+
+The allowlist is re-checked on every authenticated request — removing
+an operator from `ADMIN_EMAILS` (via `flyctl secrets set`) kicks them
+out within one request. To force *all* operators to re-sign-in, rotate
+`ADMIN_SESSION_SECRET`. To rotate magic-link issuance only, rotate
+`ADMIN_TOKEN_SECRET`.
+
+Login submissions for non-allowlisted emails return the same "check
+your inbox" response as allowlisted ones, with no email actually
+sent. This avoids leaking who can sign in. The tradeoff: an operator
+who fat-fingers their own email gets a silent failure (no email
+arrives, no error UI).
