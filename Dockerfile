@@ -1,7 +1,8 @@
-FROM node:20-alpine AS base
+FROM node:22-alpine AS base
 
-# Install pnpm
-RUN corepack enable && corepack prepare pnpm@latest --activate
+# Install pnpm — pinned major to match ci.yml (pnpm 9); pnpm 11 needs node:sqlite
+# and broke the build when @latest started resolving to it (2026-07-05).
+RUN corepack enable && corepack prepare pnpm@9 --activate
 
 # --- Dependencies ---
 FROM base AS deps

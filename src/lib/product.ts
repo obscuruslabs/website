@@ -50,7 +50,7 @@ export const PRODUCTS = {
     id: 'viso-prototype',
     name: 'VISO Prototype',
     codename: 'Pre-Ghost',
-    priceCents: 2900,
+    priceCents: 11000,
     currency: 'usd',
     tagline: 'A working prototype from the bench. Hand-built, full IR emitter array. Numbered, limited.',
     description:

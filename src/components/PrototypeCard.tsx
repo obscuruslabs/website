@@ -7,8 +7,8 @@ import BuyButton from './BuyButton';
 
 const ANGLES = [
   { src: '/prototypes/prototype-3.jpg', alt: 'VISO prototype, front view' },
-  { src: '/prototypes/prototype-2.jpg', alt: 'VISO prototype, three-quarter view' },
-  { src: '/prototypes/prototype-1.jpg', alt: 'VISO prototype, side view' },
+  { src: '/prototypes/prototype-2.jpg', alt: 'VISO prototype, rear view showing OBSCURUS branding' },
+  { src: '/prototypes/prototype-1.jpg', alt: 'VISO prototype, side view showing OBSCURUS branding' },
 ];
 
 export default async function PrototypeCard() {
