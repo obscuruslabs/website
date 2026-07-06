@@ -69,7 +69,7 @@ export default async function PrototypeCard() {
         </h3>
 
         <p className="text-neutral-400 text-sm leading-relaxed">
-          Real prototypes from our lab. Full IR emitter array, rough edges, fully
+          Anti surveillance eyewear from our lab. Full IR emitter array, clean edges, fully
           functional. Ship within 5 business days.
         </p>
 
