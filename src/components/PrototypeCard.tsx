@@ -69,7 +69,7 @@ export default async function PrototypeCard() {
         </h3>
 
         <p className="text-neutral-400 text-sm leading-relaxed">
-          Real prototypes from our lab. Full IR emitter array, rough edges, fully
+          A Real product manufactured in our lab. A full IR emitting array, cleaned, and fully
           functional. Ship within 5 business days.
         </p>
 
@@ -85,7 +85,7 @@ export default async function PrototypeCard() {
             </div>
           </div>
           <BuyButton
-            sku="viso-prototype"
+            sku="Obscurus-Optics"
             code={discount?.code}
             disabled={!inventory.available}
             label={
@@ -99,7 +99,7 @@ export default async function PrototypeCard() {
 
         {!inventory.available && (
           <p className="text-xs text-neutral-500">
-            All prototypes are spoken for. Join the waitlist for VISO .01.
+            All prototypes are spoken for. Join the waitlist for Obscurus-Optics.
           </p>
         )}
       </div>
