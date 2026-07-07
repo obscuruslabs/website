@@ -24,7 +24,7 @@ export default function ComingSoon({ banner }: Props = {}) {
             </h1>
             <p className="text-lg text-neutral-400 leading-relaxed">
               Anti-surveillance eyewear. Invisible to eyes. Blinding to sensors.
-              VISO .01 &apos;Ghost&apos; ships this summer.
+              The Obscurus Optics ships later this summer.
             </p>
           </div>
 
