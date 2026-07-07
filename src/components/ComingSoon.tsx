@@ -41,9 +41,8 @@ export default function ComingSoon({ banner }: Props = {}) {
                 Hear when <span className="text-neutral-500">.01 ships.</span>
               </h3>
               <p className="text-neutral-400 text-sm leading-relaxed mb-8">
-                One email when VISO .01 &lsquo;Ghost&rsquo; is available. No
-                marketing, no digests. We send a confirmation link first to keep
-                the list clean.
+                One email when the Obscurus Optics are out for order. you wont be signed for
+                marketing nor any digests, We send a confirmation link.
               </p>
               <div className="mt-auto">
                 <Waitlist compact />
