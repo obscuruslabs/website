@@ -13,7 +13,7 @@ export default function TermsPage() {
 
       <h2 className="text-2xl font-semibold mt-8 mb-3">2. Product use</h2>
       <p className="text-neutral-400 leading-relaxed mb-6">
-        VISO frames emit near-infrared light in accordance with IEC 62471 Risk Group Exempt classification.
+        Obscurus Optics emit near-infrared light in accordance with IEC 62471 Risk Group Exempt classification.
         You are responsible for compliance with local laws and venue policies. We do not claim the product
         will render you invisible to every imaging system.
       </p>
