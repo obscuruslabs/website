@@ -64,7 +64,7 @@ export default function Hero() {
               viso <span className="text-neutral-500">.01 &apos;ghost&apos;</span>
             </h2>
             <p className="text-neutral-400 text-lg">
-              Anti-surveillance eyewear. 4-hour runtime. <br />
+              Anti-surveillance eyewear. 8 hour runtime. <br />
               Invisible to eyes. Blinding to sensors.
             </p>
           </div>
