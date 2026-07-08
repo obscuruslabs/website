@@ -54,9 +54,6 @@ export default async function PrototypeCard() {
 
       <div className="p-6 flex flex-col gap-4 flex-1">
         <div className="flex items-baseline justify-between gap-3 flex-wrap">
-          <p className="text-xs text-neutral-500 uppercase tracking-widest">
-            buy a prototype
-          </p>
           <p className="text-xs text-neutral-500">
             {inventory.soldOut
               ? 'sold out'
@@ -90,8 +87,8 @@ export default async function PrototypeCard() {
             disabled={!inventory.available}
             label={
               discount
-                ? `[ buy prototype — ${formatPrice(product.priceCents)} (${discount.percentOff}% off) ]`
-                : `[ buy prototype — ${formatPrice(product.priceCents)} ]`
+                ? `[ preorder — ${formatPrice(product.priceCents)} (${discount.percentOff}% off) ]`
+                : `[ preorder — ${formatPrice(product.priceCents)} ]`
             }
             className="bg-white text-black px-6 py-3 rounded-xl font-bold hover:bg-purple-600 hover:text-white transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
           />
