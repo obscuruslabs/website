@@ -26,7 +26,7 @@ export default function BuyButton({
   const [error, setError] = useState<string | null>(null);
 
   const product = PRODUCTS[sku];
-  const defaultLabel = `[ buy now — ${formatPrice(product.priceCents)} ]`;
+  const defaultLabel = `[ preorder now — ${formatPrice(product.priceCents)} ]`;
   const visibleLabel = label ?? defaultLabel;
 
   function onClick() {
