@@ -15,7 +15,7 @@ const PLAUSIBLE_SCRIPT_SRC = process.env.NEXT_PUBLIC_PLAUSIBLE_SCRIPT_SRC;
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "obscurus labs — VISO .01 'Ghost'",
+    default: "Obscurus Labs",
     template: '%s',
   },
   description:
